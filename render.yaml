@@ -1,0 +1,20 @@
+services:
+  - type: web
+    name: ledgerloop-backend
+    env: python
+    plan: free
+    rootDir: backend
+    buildCommand: pip install -r requirements.txt
+    startCommand: gunicorn ledgerloop.wsgi:application
+    envVars:
+      - key: DJANGO_SETTINGS_MODULE
+        value: ledgerloop.settings
+      - key: PYTHON_VERSION
+        value: 3.11.6
+
+  - type: web
+    name: ledgerloop-frontend
+    env: static
+    rootDir: frontend
+    buildCommand: npm install && npm run build
+    staticPublishPath: build
