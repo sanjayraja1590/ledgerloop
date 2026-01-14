@@ -117,29 +117,36 @@ function App() {
     if (!selectedMonth) return;
 
     fetch(`${API_BASE}/expenses/summary/?month=${selectedMonth}`)
-      .then((res) => res.json())
-      .then(setSummary)
-      .catch(() => setSummary({}));
-  }, [selectedMonth]);
+      .then(res => res.json())
+      .then(setSummary);
+  }, [allExpenses, selectedMonth]);
+
 
   /* ---------- DELETE ---------- */
   const deleteExpense = async (id) => {
-    try {
-      const exp = allExpenses.find((e) => e.id === id);
-      if (!exp) return;
+  try {
+    const exp = allExpenses.find((e) => e.id === id);
+    if (!exp) return;
 
-      const res = await fetch(`${API_BASE}/expenses/${id}/`, {
-        method: "DELETE",
-      });
+    const res = await fetch(`${API_BASE}/expenses/${id}/`, {
+      method: "DELETE",
+    });
 
-      if (!res.ok) throw new Error("Delete failed");
+    if (!res.ok) throw new Error("Delete failed");
 
-      setAllExpenses((prev) => prev.filter((e) => e.id !== id));
-      setTotal((prev) => prev - Number(exp.amount));
-    } catch (err) {
-      console.error(err);
-    }
-  };
+    setAllExpenses((prev) => prev.filter((e) => e.id !== id));
+    setTotal((prev) => prev - Number(exp.amount));
+
+    // 🔥 force summary refresh
+    fetch(`${API_BASE}/expenses/summary/?month=${selectedMonth}`)
+      .then((r) => r.json())
+      .then(setSummary);
+
+  } catch (err) {
+    console.error(err);
+  }
+};
+
 
 // ---- SORT EXPENSES BY DATE ----
 const sortedExpenses = [...filteredExpenses].sort((a, b) => {
@@ -381,7 +388,11 @@ sortedExpenses.forEach((e) => {
       <AddExpenseModal
         open={openAdd}
         onClose={() => setOpenAdd(false)}
-        onAdded={onExpenseAdded}
+        onAdded={(newExpense) => {
+  setAllExpenses((prev) => [newExpense, ...prev]);
+  setTotal((prev) => prev + Number(newExpense.amount));
+}}
+
       />
 
 

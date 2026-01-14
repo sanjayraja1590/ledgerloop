@@ -52,8 +52,9 @@ const submit = async (e) => {
 
     if (!res.ok) throw new Error("Add failed");
 
-    const newExpense = await res.json();
-    onAdded(newExpense);
+    const newExpense = await res.json(); // 🔥 IMPORTANT
+
+    onAdded(newExpense); // pass data UP
     onClose();
   } catch (err) {
     console.error(err);
