@@ -1,15 +1,15 @@
-from django.urls import path
+from django.urls import path, include
 from rest_framework.routers import DefaultRouter
-from .views import CategoryListView, ExpenseViewSet, AvailableMonthsView, CategorySummaryView
+from .views import ExpenseViewSet, AvailableMonthsView, CategorySummaryView, CategoryListView
 
 router = DefaultRouter()
-router.register("expenses", ExpenseViewSet, basename="expense")
+router.register(r'expenses', ExpenseViewSet, basename='expense')
 
 urlpatterns = [
-    path("expenses/months/", AvailableMonthsView.as_view()),
-    path("expenses/summary/", CategorySummaryView.as_view()),
-    path("categories/", CategoryListView.as_view()),
+    path("", include(router.urls)),
 
+    # ✅ PUBLIC ROUTES
+    path("months/", AvailableMonthsView.as_view(), name="months"),
+    path("summary/", CategorySummaryView.as_view(), name="summary"),
+    path("categories/", CategoryListView.as_view(), name="categories"),
 ]
-
-urlpatterns += router.urls
