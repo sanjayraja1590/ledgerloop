@@ -11,7 +11,6 @@ ALLOWED_HOSTS = ["*"]  # OK for now on Render
 # ---------------- APPS ----------------
 INSTALLED_APPS = [
     "corsheaders",
-
     "django.contrib.admin",
     "django.contrib.auth",
     "django.contrib.contenttypes",
@@ -20,6 +19,7 @@ INSTALLED_APPS = [
     "django.contrib.staticfiles",
 
     "rest_framework",
+    'rest_framework_simplejwt',
     "expenses",
 ]
 
@@ -62,12 +62,9 @@ import os
 
 DATABASES = {
     "default": dj_database_url.config(
-        default=os.environ.get("DATABASE_URL"),
-        conn_max_age=600,
-        ssl_require=True,
+        default=os.getenv("postgresql://ledgerloop_db_user:azFpbJgiTiBKb0gtXWKT0HIZJtUEYsLN@dpg-d5jk9av5r7bs7381lrqg-a.oregon-postgres.render.com/ledgerloop_db")
     )
 }
-
 
 # ---------------- PASSWORDS ----------------
 AUTH_PASSWORD_VALIDATORS = [
@@ -96,3 +93,21 @@ CORS_ALLOW_ALL_ORIGINS = True
 
 # ---------------- DEFAULT PK ----------------
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
+
+# ---------------- JWT config ----------------
+from datetime import timedelta
+
+REST_FRAMEWORK = {
+    "DEFAULT_AUTHENTICATION_CLASSES": (
+        "rest_framework_simplejwt.authentication.JWTAuthentication",
+    ),
+    "DEFAULT_PERMISSION_CLASSES": (
+        "rest_framework.permissions.IsAuthenticated",
+    ),
+}
+
+SIMPLE_JWT = {
+    "ACCESS_TOKEN_LIFETIME": timedelta(minutes=60),
+    "REFRESH_TOKEN_LIFETIME": timedelta(days=1),
+    "AUTH_HEADER_TYPES": ("Bearer",),
+}

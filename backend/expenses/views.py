@@ -5,11 +5,12 @@ from .models import Expense
 from .serializers import ExpenseSerializer
 from django.db.models import Sum
 from rest_framework.views import APIView
+from rest_framework.permissions import IsAuthenticated
 
 
 class AvailableMonthsView(APIView):
     def get(self, request):
-        months = Expense.objects.dates("date", "month", order="DESC")
+        months = Expense.objects.filter(user=request.user).dates("date", "month", order="DESC")
         month_list = [m.strftime("%Y-%m") for m in months]
         return Response(month_list)
 
@@ -17,9 +18,12 @@ from rest_framework.response import Response
 
 class ExpenseViewSet(ModelViewSet):
     serializer_class = ExpenseSerializer
+    permission_classes = [IsAuthenticated]
+
 
     def get_queryset(self):
-        queryset = Expense.objects.all()
+        queryset = Expense.objects.filter(user=self.request.user)
+
 
         # -------- MONTH FILTER (YYYY-MM) --------
         month_param = self.request.query_params.get("month")
@@ -57,6 +61,10 @@ class ExpenseViewSet(ModelViewSet):
             queryset = queryset.order_by("-id")
 
         return queryset
+    
+    def perform_create(self, serializer):
+        serializer.save(user=self.request.user)
+
 
     def list(self, request, *args, **kwargs):
         queryset = self.get_queryset()
@@ -73,7 +81,7 @@ class CategorySummaryView(APIView):
     def get(self, request):
         month = request.query_params.get("month")
 
-        queryset = Expense.objects.all()
+        queryset = Expense.objects.filter(user=request.user)
 
         if month:
             year, month = month.split("-")
