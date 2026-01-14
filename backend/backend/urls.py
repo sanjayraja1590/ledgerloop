@@ -1,15 +1,15 @@
-from django.contrib import admin
 from django.urls import path, include
-from rest_framework_simplejwt.views import (
-    TokenObtainPairView,
-    TokenRefreshView,
-)
+from rest_framework.routers import DefaultRouter
+from .views import ExpenseViewSet, AvailableMonthsView, CategorySummaryView, CategoryListView
+
+router = DefaultRouter()
+router.register(r'expenses', ExpenseViewSet, basename='expense')
 
 urlpatterns = [
-    path("admin/", admin.site.urls),
-    path("api/", include("expenses.urls")),
+    path("", include(router.urls)),
 
-    # JWT AUTH
-    path("api/token/", TokenObtainPairView.as_view(), name="token_obtain_pair"),
-    path("api/token/refresh/", TokenRefreshView.as_view(), name="token_refresh"),
+    # ✅ PUBLIC ROUTES
+    path("months/", AvailableMonthsView.as_view(), name="months"),
+    path("summary/", CategorySummaryView.as_view(), name="summary"),
+    path("categories/", CategoryListView.as_view(), name="categories"),
 ]
