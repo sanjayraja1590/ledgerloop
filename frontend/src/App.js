@@ -47,24 +47,9 @@ function App() {
   const [openAdd, setOpenAdd] = useState(false);
 
     /* ---------- REFRESH EXPENSES (USED AFTER ADD) ---------- */
-  const refreshExpenses = async () => {
-    if (!selectedMonth) return;
-
-    let url = `${API_BASE}/expenses/?month=${selectedMonth}`;
-    if (sortType.includes("amount")) {
-      url += `&sort=${sortType}`;
-    }
-
-
-    try {
-      const res = await fetch(url);
-      const data = await res.json();
-
-      setAllExpenses(data.expenses || []);
-      setTotal(data.total || 0);
-    } catch (err) {
-      console.error("Refresh expenses failed:", err);
-    }
+  const onExpenseAdded = (expense) => {
+    setAllExpenses(prev => [expense, ...prev]);
+    setTotal(prev => prev + Number(expense.amount));
   };
 
 
@@ -395,20 +380,10 @@ sortedExpenses.forEach((e) => {
 
       <AddExpenseModal
         open={openAdd}
-        categories={["General", ...categories.filter(c => c !== "General")]}
         onClose={() => setOpenAdd(false)}
-        onAdded={(expense) => {
-          if (!expense) {
-            refreshExpenses();
-            return;
-          }
-
-          setAllExpenses((prev) => [expense, ...prev]);
-          setTotal((prev) => prev + Number(expense.amount));
-        }}
-
-
+        onAdded={onExpenseAdded}
       />
+
 
     </div>
   );
